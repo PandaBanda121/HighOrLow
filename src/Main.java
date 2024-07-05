@@ -6,14 +6,26 @@ import static java.lang.System.*;
 
 public class Main {
     static int N = 20;
-
     static int rounds, attempts, quota;
+    static int num, next;
     static double current, mult;
     static double deposit = 0;
     static int choice; // 0 = lower, 1 = higher
 
     public static void main(String[] args) throws IOException {
         Scanner sc = new Scanner(System.in);
+
+        initGame();
+
+        for(int i = 0; i < attempts; i++) {
+            initAttempt();
+            String temp = sc.next();
+            choice = (temp.equalsIgnoreCase("l") || temp.equals("0"))?0:1;
+            makeMove();
+        }
+
+        // TESTING
+        /*
         double[] results = new double[100];
         for(int i = 0; i < 100; i++) results[i] = testMultipliers(5, 15, 0, 10, 1);
 
@@ -26,10 +38,38 @@ public class Main {
         for(int i = 0; i < 100; i++) stdev = stdev+(results[i]-avg)*(results[i]-avg);
         stdev = Math.sqrt(stdev/100);
         out.println(avg + " " + stdev);
-
+        */
 
 
         sc.close();
+    }
+
+
+    public static void initGame() {
+        quota = 15;
+        current = 10;
+        attempts = 10;
+        mult = 1;
+        choice = 1;
+    }
+
+    public static void initAttempt() {
+        num = (int) (Math.random()*N)+1;
+        while(num == N || num == 1) num = (int) (Math.random()*N)+1;
+        out.println("Current number is " + num + ", High or Low?");
+        next = (int) (Math.random()*N)+1;
+        while(next == num) next = (int) (Math.random()*N)+1;
+    }
+    public static void makeMove() {
+        out.println("Good guess... The next number is " + next + ".");
+        if((choice == 0 && next < num) || (choice == 1 && next > num)) {
+            if(choice == 0) mult = mult + (double) Math.round( (1-(double)num/(double)N)*100 )/100;
+            else mult = mult+ (double) Math.round( ((double)num/(double)N)*100 )/100;
+            out.println("Nice, you gained multiplier, you are now at " + mult + "x");
+        } else {
+            out.println("Yikes, you lost... your multiplier is now 1. #loser");
+            mult = 1;
+        }
     }
 
     public static double testMultipliers(int testAttempts, int testQuota, double testDeposit, double testCurrent, double testMult) {
@@ -40,13 +80,13 @@ public class Main {
         current = testCurrent;
         for(int i = 0; i < attempts; i++) {
             int num = (int) (Math.random()*N)+1;
-            while(num == N) num = (int) (Math.random()*N)+1;
+            while(num == N || num==1) num = (int) (Math.random()*N)+1;
             choice = (num>N/2)?0:1; //0=pick lower, 1=pick higher
             int next = (int) (Math.random()*N)+1;
-            while(next == num) next = (int) (Math.random()*N);
+            while(next == num) next = (int) (Math.random()*N)+1;
             //add to multiplier if 1) pick lower and is lower or 2) pick higher and is higher
             //else multiplier = 1
-            addMultiplier(num, next);
+            makeMove();
             mult = Math.round(mult*100.0)/100.0;
             if(mult*current >= quota) {
                 current = mult*current;
@@ -55,30 +95,10 @@ public class Main {
                 mult = 1;
             }
         }
+        deposit = deposit+current*mult;
         return Math.round(deposit*100.0)/100.0;
     }
 
-    public static void initGame() {
-        quota = 25;
-        current = 10;
-        attempts = 10;
-        choice = 1;
-    }
-
-    public static void roundX() {
-    }
-
-    public static void addMultiplier(int num, int next) {
-        if((choice == 0 && next < num) || (choice == 1 && next > num)) {
-            if(choice == 0) {
-                mult = mult + 1-(double)num/(double)N;
-            } else {
-                mult = mult+(double)num/(double)N;
-            }
-        } else {
-            mult = 1;
-        }
-    }
 }
 
 
