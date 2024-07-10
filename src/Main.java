@@ -17,11 +17,32 @@ public class Main {
 
         initGame();
 
+        out.println("Round " + rounds);
+
         for(int i = 0; i < attempts; i++) {
+            out.println("Attempt    #" + i);
+            out.println("Quota:      " + quota);
+            out.println("Deposit:    " + deposit);
+            out.println("Current:    " + current);
+            out.println("Multiplier: " + mult);
             initAttempt();
             String temp = sc.next();
             choice = (temp.equalsIgnoreCase("l") || temp.equals("0"))?0:1;
             makeMove();
+            if(mult*current >= quota) {
+                out.println("Your multiplier now is " + mult + ", meaning you can deposit " + mult*current + ".");
+                out.println("Deposit and finish up the round? (y/n)");
+                temp = sc.next();
+                if(temp.equalsIgnoreCase("y")) {
+                    makeDeposit();
+                    out.println("Onto the next round!");
+                    break;
+                } else {
+                    out.println("Aight keep the risk going :)");
+                }
+            } else {
+                out.println("Keep going, almost there to quota :)");
+            }
         }
 
         // TESTING
@@ -40,10 +61,12 @@ public class Main {
         out.println(avg + " " + stdev);
         */
 
-
         sc.close();
     }
 
+//    public static double div(int a, int b) {
+//        return Math.round( (double)a/(double)b*100.0 )/100.0;
+//    }
 
     public static void initGame() {
         quota = 15;
@@ -62,15 +85,21 @@ public class Main {
     }
     public static void makeMove() {
         out.println("Good guess... The next number is " + next + ".");
-        if((choice == 0 && next < num) || (choice == 1 && next > num)) {
-            if(choice == 0) mult = mult + (double) Math.round( (1-(double)num/(double)N)*100 )/100;
-            else mult = mult+ (double) Math.round( ((double)num/(double)N)*100 )/100;
-            out.println("Nice, you gained multiplier, you are now at " + mult + "x");
-        } else {
-            out.println("Yikes, you lost... your multiplier is now 1. #loser");
-            mult = 1;
+        boolean win = (choice == 0 && next < num) || (choice == 1 && next > num);
+        double multAdd = Math.round(100.0*num/N)/100.0;
+        if(choice == 0) {
+            multAdd = 1.00-multAdd;
         }
+        if(!win) multAdd = -multAdd;
+        mult = Math.round(100.0*(mult+multAdd))/100.0;
     }
+
+    public static void makeDeposit() {
+        deposit = deposit+current*mult;
+        current = 0;
+        mult = 1;
+    }
+
 
     public static double testMultipliers(int testAttempts, int testQuota, double testDeposit, double testCurrent, double testMult) {
         mult = testMult;
